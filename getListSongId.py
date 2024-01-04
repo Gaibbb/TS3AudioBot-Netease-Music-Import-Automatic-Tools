@@ -4,14 +4,22 @@ import re
 import json
 import subprocess
 import os
+import sys
 
-playlistId = input("Please enter the playlist id: ")
-addr = input("Please enter the server address: ")
-port = input("Please enter the server port: ")
-listId = input("Please enter the target list id: ")
-token = input('Please enter your token: ')
+arg = []
 
-url = "https://music.163.com/playlist?id=" + playlistId
+argv_name = ['playlistId', 'addr', 'port', 'listId', 'token']
+
+if len(sys.argv) == 6:
+    for i in range(5):
+        arg.append(sys.argv[i + 1])
+else:
+    # for i in range(len(arg)):
+    #    arg[i] = input(f"Please enter the {argv_name[i]}: ")
+    print("Please enter the right arguments.")
+    exit()
+
+url = "https://music.163.com/playlist?id=" + arg[0]
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
@@ -44,7 +52,7 @@ with open('song.json', 'w', encoding = 'utf-8') as file:
 scriptPath = 'get.js'
 
 def subprocess_script():
-    process = subprocess.Popen(['node', scriptPath, addr, port, listId, token], stdout=subprocess.PIPE, text=True)
+    process = subprocess.Popen(['node', scriptPath, arg[1], arg[2], arg[3], arg[4]], stdout=subprocess.PIPE, text=True)
     stdout, stderr = process.communicate()
 
     print(stdout)
@@ -54,8 +62,5 @@ def subprocess_script():
 
 subprocess_script()
 
-try:
-    os.remove('song.json')
-    os.remove('output.html')
-except OSError as e:
-    print(f"Error: {e.filename} - {e.strerror}")
+os.remove('song.json')
+os.remove('output.html')

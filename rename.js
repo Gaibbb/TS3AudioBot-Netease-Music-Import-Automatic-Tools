@@ -1,4 +1,4 @@
-const token = 'b1hmTXJQVThDZEJkUHo2YjdhdXdqZkxxVjhNPTprdW5GYjc5eE5EUFRvS0VXZ2hnQ293blhQN0hFbVc4UA=='
+const token = 'token=='
 
 const headers = new Headers({
     'Authorization': `Basic ${token}`,
@@ -10,7 +10,7 @@ const requestOption = {
     headers: headers,
 };
 
-url = 'http://121.37.225.70:58913/api/bot/use/0/(/list/item/name/2d/39/nihao)'
+url = 'http://addr:port/api/bot/use/0/(/list/item/name/id/index/name)'
 
 fetch(url, requestOption)
     .then(response => {

@@ -24,9 +24,16 @@ async function sendURL(url, requestOptions) {
 async function getListSongNumber(requestOptions, listId, addr, port) {
     const url = `http://${addr}:${port}/api/bot/use/0/(/list/list/${listId})`
     const data = await sendURL(url, requestOptions);
-    const number = ((data).find(item => item.Id === listId)).SongCount;
+    if (!((data).find(item => item.Id === listId))) {
+        url_create = `http://${addr}:${port}/api/bot/use/0/(/list/create/${listId}/${listId})`
+        const data_create = await sendURL(url_create, requestOptions);
+        console.log(`New playlist ${listId} created success.\n` + data_create);
 
-    return number;
+        const data_new = await sendURL(url, requestOptions);
+        return ((data_new).find(item => item.Id === listId)).SongCount;
+    } else {
+        return ((data).find(item => item.Id === listId)).SongCount;
+    }
 };
 
 async function readJsonFile() {
@@ -56,6 +63,7 @@ async function addSongToTheList(requestOptions, listId, addr, port) {
     try {
         for (let key in dataArray) {
             const songBeginNumber = await getListSongNumber(requestOptions, listId, addr, port);
+            // if(getListSongNumber === )
             const songId = dataArray[key][0];
             const songName = dataArray[key][1];
             const songAddURL = `http://${addr}:${port}/api/bot/use/0/(/list/add/${listId}/http%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D${songId}.mp3)`;
@@ -77,17 +85,6 @@ async function addSongToTheList(requestOptions, listId, addr, port) {
     } catch (error) {
         console.error('Error during song addition and renaming:', error);
     } 
-};
-
-function delOutputFile() {
-    const filePath = 'output.html'
-    fs.unlink(filePath, (err) => {
-        if (err) {
-            console.error('Error deleting file:, ', err);
-        } else {
-            console.log('File deleted.');
-        }
-    })
 };
 
 function start() {
