@@ -2,12 +2,14 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import os
 
-url = "https://music.163.com/playlist?id=8074330111"
+url = "https://music.163.com/playlist?id=786711774"
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
     # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Cookie': 'os=pc'
 }
 
 response = requests.get(url, headers = headers)

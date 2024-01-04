@@ -1,16 +1,11 @@
-const token = 'b1hmTXJQVThDZEJkUHo2YjdhdXdqZkxxVjhNPTprdW5GYjc5eE5EUFRvS0VXZ2hnQ293blhQN0hFbVc4UA=='
 const fs = require('fs');
-const { readJsonConfigFile } = require('typescript');
+const { readJsonConfigFile, OutputFileType } = require('typescript');
+const readline = require('readline');
 
-const headers = new Headers({
-    'Authorization': `Basic ${token}`,
-    'Content-Type': 'application/json',
-});
-
-const requestOption = {
-    method: 'Get',
-    headers: headers,
-};
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
 
 async function sendURL(url, requestOptions) {
     const response = await fetch(url, requestOptions)
@@ -27,7 +22,7 @@ async function sendURL(url, requestOptions) {
 };
 
 async function getListSongNumber(requestOptions, listId) {
-    const url = `http://121.37.225.70:58913/api/bot/use/0/(/list/list/${listId})`
+    const url = `http://${addr_in}:${port_in}/api/bot/use/0/(/list/list/${listId})`
     const data = await sendURL(url, requestOptions);
     const number = ((data).find(item => item.Id === listId)).SongCount;
 
@@ -57,23 +52,65 @@ async function readJsonFile() {
 
 async function addSongToTheList(requestOptions, listId) {
     const dataArray = await readJsonFile();
-    console.log(`The following songs will be add into the ${listId}\n` + dataArray);
+    console.log(`The following songs will be add into the ${listId}\n` + dataArray[1]);
     for (let key in dataArray) {
         const songBeginNumber = await getListSongNumber(requestOptions, listId);
         const songId = dataArray[key][0];
         const songName = dataArray[key][1];
-        const songAddURL = `http://121.37.225.70:58913/api/bot/use/0/(/list/add/${listId}/http%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D${songId}.mp3)`;
-        const nameChangeURL = `http://121.37.225.70:58913/api/bot/use/0/(/list/item/name/${listId}/${songBeginNumber}/${songName})`;
+        const songAddURL = `http://${addr_in}:${port_in}/api/bot/use/0/(/list/add/${listId}/http%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D${songId}.mp3)`;
+        const nameChangeURL = `http://${addr_in}:${port_in}/api/bot/use/0/(/list/item/name/${listId}/${songBeginNumber}/${songName})`;
 
         const createResponse = await sendURL(songAddURL, requestOptions);
-        console.log(createResponse);
+        if (createResponse.ErrorCode === 10) {
+            continue;
+        }
+        console.log("songId = " + songId + "  songName = " + songName);
+        // console.log(createResponse);
     
         const renameResponse = await sendURL(nameChangeURL, requestOptions);
-        console.log(renameResponse);
+        // console.log(renameResponse);
     }
 };
 
+function delOutputFile() {
+    const filePath = 'output.html'
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error('Error deleting file:, ', err);
+        } else {
+            console.log('File deleted.');
+        }
+    })
+};
 
-const Id = 'guoyao';
-addSongToTheList(requestOption, Id);
+let addr_in, port_in, list_id, token_in;
 
+rl.question("Please enter server's address: ", (addr) => {
+    addr_in = addr;
+
+    rl.question("Please enter ts3audiobot server's port: ", (port) => {
+        port_in = port;
+
+        rl.question("Please enter audiobot list id: ", (id) => {
+            list_id = id;
+            
+            rl.question("Please enter your token: ", (token) => {
+                token_in = token;
+                rl.close();
+
+                const headers = new Headers({
+                    'Authorization': `Basic ${token_in}`,
+                    'Content-Type': 'application/json',
+                });
+                
+                const requestOption = {
+                    method: 'Get',
+                    headers: headers,
+                };
+
+                addSongToTheList(requestOption, list_id);
+                delOutputFile();
+            })
+        })
+    })
+});
