@@ -2,13 +2,19 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import subprocess
 import os
 
-url = "https://music.163.com/playlist?id=786711774"
+playlistId = input("Please enter the playlist id: ")
+addr = input("Please enter the server address: ")
+port = input("Please enter the server port: ")
+listId = input("Please enter the target list id: ")
+token = input('Please enter your token: ')
+
+url = "https://music.163.com/playlist?id=" + playlistId
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
-    # 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'Cookie': 'os=pc'
 }
 
@@ -34,3 +40,22 @@ for a in a_list:
 data = json.dumps(data, indent = 2)
 with open('song.json', 'w', encoding = 'utf-8') as file:
     file.write(data)
+
+scriptPath = 'get.js'
+
+def subprocess_script():
+    process = subprocess.Popen(['node', scriptPath, addr, port, listId, token], stdout=subprocess.PIPE, text=True)
+    stdout, stderr = process.communicate()
+
+    print(stdout)
+    print(stderr)
+    process.wait()
+    print(process.returncode)
+
+subprocess_script()
+
+try:
+    os.remove('song.json')
+    os.remove('output.html')
+except OSError as e:
+    print(f"Error: {e.filename} - {e.strerror}")

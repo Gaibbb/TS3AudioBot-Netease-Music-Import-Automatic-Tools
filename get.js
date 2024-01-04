@@ -21,8 +21,8 @@ async function sendURL(url, requestOptions) {
     return data;
 };
 
-async function getListSongNumber(requestOptions, listId) {
-    const url = `http://${addr_in}:${port_in}/api/bot/use/0/(/list/list/${listId})`
+async function getListSongNumber(requestOptions, listId, addr, port) {
+    const url = `http://${addr}:${port}/api/bot/use/0/(/list/list/${listId})`
     const data = await sendURL(url, requestOptions);
     const number = ((data).find(item => item.Id === listId)).SongCount;
 
@@ -50,26 +50,33 @@ async function readJsonFile() {
     });
 }
 
-async function addSongToTheList(requestOptions, listId) {
+async function addSongToTheList(requestOptions, listId, addr, port) {
     const dataArray = await readJsonFile();
-    console.log(`The following songs will be add into the ${listId}\n` + dataArray[1]);
-    for (let key in dataArray) {
-        const songBeginNumber = await getListSongNumber(requestOptions, listId);
-        const songId = dataArray[key][0];
-        const songName = dataArray[key][1];
-        const songAddURL = `http://${addr_in}:${port_in}/api/bot/use/0/(/list/add/${listId}/http%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D${songId}.mp3)`;
-        const nameChangeURL = `http://${addr_in}:${port_in}/api/bot/use/0/(/list/item/name/${listId}/${songBeginNumber}/${songName})`;
+    console.log(`The following songs will be add into the ${listId}\n`);
+    try {
+        for (let key in dataArray) {
+            const songBeginNumber = await getListSongNumber(requestOptions, listId, addr, port);
+            const songId = dataArray[key][0];
+            const songName = dataArray[key][1];
+            const songAddURL = `http://${addr}:${port}/api/bot/use/0/(/list/add/${listId}/http%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D${songId}.mp3)`;
+            const nameChangeURL = `http://${addr}:${port}/api/bot/use/0/(/list/item/name/${listId}/${songBeginNumber}/${songName})`;
 
-        const createResponse = await sendURL(songAddURL, requestOptions);
-        if (createResponse.ErrorCode === 10) {
-            continue;
+            const createResponse = await sendURL(songAddURL, requestOptions);
+            if (createResponse.ErrorCode === 10) {
+                continue;
+            }
+            console.log("songId = " + songId + "  songName = " + songName);
+            // console.log(createResponse);
+        
+            await sendURL(nameChangeURL, requestOptions);
+            // console.log(renameResponse);
         }
-        console.log("songId = " + songId + "  songName = " + songName);
-        // console.log(createResponse);
-    
-        const renameResponse = await sendURL(nameChangeURL, requestOptions);
-        // console.log(renameResponse);
-    }
+
+        console.log("All songs have been add to the playlist");
+        process.exit();
+    } catch (error) {
+        console.error('Error during song addition and renaming:', error);
+    } 
 };
 
 function delOutputFile() {
@@ -83,34 +90,24 @@ function delOutputFile() {
     })
 };
 
-let addr_in, port_in, list_id, token_in;
+function start() {
+    const args = process.argv.slice(2);
+    const addr_in = args[0];
+    const port_in = args[1];
+    const list_id = args[2];
+    const token_in = args[3];
 
-rl.question("Please enter server's address: ", (addr) => {
-    addr_in = addr;
+    const headers = new Headers({
+        'Authorization': `Basic ${token_in}`,
+        'Content-Type': 'application/json',
+    });
+    
+    const requestOption = {
+        method: 'Get',
+        headers: headers,
+    };
 
-    rl.question("Please enter ts3audiobot server's port: ", (port) => {
-        port_in = port;
+    addSongToTheList(requestOption, list_id, addr_in, port_in);
+}
 
-        rl.question("Please enter audiobot list id: ", (id) => {
-            list_id = id;
-            
-            rl.question("Please enter your token: ", (token) => {
-                token_in = token;
-                rl.close();
-
-                const headers = new Headers({
-                    'Authorization': `Basic ${token_in}`,
-                    'Content-Type': 'application/json',
-                });
-                
-                const requestOption = {
-                    method: 'Get',
-                    headers: headers,
-                };
-
-                addSongToTheList(requestOption, list_id);
-                delOutputFile();
-            })
-        })
-    })
-});
+start();
