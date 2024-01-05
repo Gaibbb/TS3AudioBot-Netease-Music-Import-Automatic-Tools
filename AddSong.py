@@ -52,7 +52,7 @@ with open('song.json', 'w', encoding = 'utf-8') as file:
 scriptPath = 'get.js'
 
 def subprocess_script():
-    process = subprocess.Popen(['node', scriptPath, arg[1], arg[2], arg[3], arg[4]], stdout=subprocess.PIPE, text=True)
+    process = subprocess.Popen(['node', scriptPath, arg[1], arg[2], arg[3], arg[4]], stdout=subprocess.PIPE, text=True, encoding = 'utf-8')
     stdout, stderr = process.communicate()
 
     print(stdout)
