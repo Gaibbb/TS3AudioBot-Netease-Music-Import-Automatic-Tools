@@ -1,5 +1,5 @@
 # TS3AudioBot-Netease-Music-Import-Automatic-Tools
-A automatic tools for the netease music user to import their music list to ts3audiobot.
+A automatic tools for the netease music user to import playlist to ts3audiobot.
 
 # How to use?
 使用前请确保拥有Python3与NodeJS环境，并且Python已经安装了BeautifulSoup库。
