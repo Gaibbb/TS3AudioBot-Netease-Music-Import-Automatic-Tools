@@ -30,8 +30,8 @@ headers = {
 response = requests.get(url, headers = headers)
 response.encoding = response.apparent_encoding
 
-with open('output.html', 'w', encoding = 'utf-8') as file:
-    file.write(response.text)
+with open('output.html', 'w', encoding = 'utf-8') as file_html:
+    file_html.write(response.text)
 
 fp = open('output.html', 'r', encoding='utf-8')
 soup = BeautifulSoup(fp, 'lxml')
@@ -47,8 +47,8 @@ for a in a_list:
     data[id_match.group(1)] = name_match.group(1)
 
 data = json.dumps(data, indent = 2)
-with open('song.json', 'w', encoding = 'utf-8') as file:
-    file.write(data)
+with open('song.json', 'w', encoding = 'utf-8') as file_json:
+    file_json.write(data)
 
 scriptPath = 'get.js'
 
@@ -63,6 +63,9 @@ def subprocess_script():
 
 subprocess_script()
 time.sleep(10)
+
+file_html.close()
+file_json.close()
 
 os.remove('song.json')
 os.remove('output.html')
