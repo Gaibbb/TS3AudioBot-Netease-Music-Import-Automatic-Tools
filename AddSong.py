@@ -16,8 +16,6 @@ if len(sys.argv) == 6:
     for i in range(5):
         arg.append(sys.argv[i + 1])
 else:
-    # for i in range(len(arg)):
-    #    arg[i] = input(f"Please enter the {argv_name[i]}: ")
     print("Please enter the right arguments.")
     exit()
 
@@ -65,7 +63,5 @@ file_json.close()
 
 if platform.system() == "Linux":
     os.remove('song.json')
-    # os.remove('output.html')
 elif platform.system() == "Windows":
     os.unlink('song.json')
-    # os.unlink('output.html')
