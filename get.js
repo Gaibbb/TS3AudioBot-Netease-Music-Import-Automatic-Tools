@@ -120,6 +120,7 @@ function start() {
     };
 
     addSongToTheList(requestOption, list_id, addr_in, port_in);
+    process.exit();
 }
 
 start();

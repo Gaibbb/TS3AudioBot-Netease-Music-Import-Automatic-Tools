@@ -5,6 +5,7 @@ import json
 import subprocess
 import os
 import sys
+import time
 
 arg = []
 
@@ -61,6 +62,7 @@ def subprocess_script():
     print(process.returncode)
 
 subprocess_script()
+time.sleep(10)
 
 os.remove('song.json')
 os.remove('output.html')
