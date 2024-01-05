@@ -6,6 +6,7 @@ import subprocess
 import os
 import sys
 import time
+import platform
 
 arg = []
 
@@ -30,11 +31,7 @@ headers = {
 response = requests.get(url, headers = headers)
 response.encoding = response.apparent_encoding
 
-with open('output.html', 'w', encoding = 'utf-8') as file_html:
-    file_html.write(response.text)
-
-fp = open('output.html', 'r', encoding='utf-8')
-soup = BeautifulSoup(fp, 'lxml')
+soup = BeautifulSoup(response.text, 'lxml')
 
 ul = soup.find('ul', class_ = 'f-hide')
 a_list = ul.find_all('a')
@@ -64,8 +61,11 @@ def subprocess_script():
 subprocess_script()
 time.sleep(10)
 
-file_html.close()
 file_json.close()
 
-os.remove('song.json')
-os.remove('output.html')
+if platform.system() == "Linux":
+    os.remove('song.json')
+    # os.remove('output.html')
+elif platform.system() == "Windows":
+    os.unlink('song.json')
+    # os.unlink('output.html')
