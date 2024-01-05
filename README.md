@@ -1,6 +1,6 @@
 # TS3AudioBot-Netease-Music-Import-Automatic-Tools
 A automatic tools for the Netease Music user to import playlist to ts3audiobot.
-由于本人技术水平有限，此脚本不能保证运行起来百分百没问题，并且该脚本无法添加Vip歌曲。如果有运行上的问题可以提Issues或者电子邮件联系我，也可以自己修改代码来解决，代码写得很丑，请原谅555
+由于本人技术水平有限，此脚本不能保证运行起来百分百没问题，并且该脚本无法添加Vip歌曲。如果有运行上的问题可以提Issues或者电子邮件联系我，也可以自己修改代码来解决，代码写得很丑，请原谅555    
 此脚本没有重复检查机制，也就是说会重复导入已有的歌曲，看看以后什么时候水平够了完善一下。
 
 # How to use?
