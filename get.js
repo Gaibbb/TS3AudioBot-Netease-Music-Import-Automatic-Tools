@@ -16,6 +16,8 @@ async function sendURL(url, requestOptions) {
         throw new Error(`Please check yout token`);
     } else if (response.ok) {
         data = await response.json();
+    } else if (response.status === 400) {
+        data = response.status
     } else {
         throw new Error(`HTTP error: ${response.status}`);
     }
@@ -26,6 +28,9 @@ async function sendURL(url, requestOptions) {
 async function getListSongNumber(requestOptions, listId, addr, port) {
     const url = `http://${addr}:${port}/api/bot/use/0/(/list/list/${listId})`
     const data = await sendURL(url, requestOptions);
+    if (data === 400) {
+        return 114514;
+    }
 
     if (!((data).find(item => item.Id === listId))) {
         url_create = `http://${addr}:${port}/api/bot/use/0/(/list/create/${listId}/${listId})`
@@ -66,14 +71,21 @@ async function addSongToTheList(requestOptions, listId, addr, port) {
     try {
         for (let key in dataArray) {
             const songBeginNumber = await getListSongNumber(requestOptions, listId, addr, port);
-            // if(getListSongNumber === )
             const songId = dataArray[key][0];
             const songName = dataArray[key][1];
             const songAddURL = `http://${addr}:${port}/api/bot/use/0/(/list/add/${listId}/http%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D${songId}.mp3)`;
             const nameChangeURL = `http://${addr}:${port}/api/bot/use/0/(/list/item/name/${listId}/${songBeginNumber}/${songName})`;
 
+            if(getListSongNumber === 114514) {
+                console.log("songId = " + songId + "  songName = " + songName + " import fail");
+                continue
+            }
             const createResponse = await sendURL(songAddURL, requestOptions);
             if (createResponse.ErrorCode === 10) {
+                console.log("songId = " + songId + "  songName = " + songName + " is a vip song");
+                continue;
+            } else if (createResponse === 400) {
+                console.log("songId = " + songId + "  songName = " + songName + " import fail");
                 continue;
             }
             console.log("songId = " + songId + "  songName = " + songName);
