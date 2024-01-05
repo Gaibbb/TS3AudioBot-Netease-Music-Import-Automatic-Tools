@@ -12,10 +12,12 @@ async function sendURL(url, requestOptions) {
 
     if (response.status === 204) {
         data = "HTML 204, nothing to return"
+    } else if (response.status === 401) {
+        throw new Error(`Please check yout token`);
     } else if (response.ok) {
         data = await response.json();
     } else {
-        throw new error(`HTTP error: ${response.error}`);
+        throw new Error(`HTTP error: ${response.status}`);
     }
         
     return data;
@@ -24,6 +26,7 @@ async function sendURL(url, requestOptions) {
 async function getListSongNumber(requestOptions, listId, addr, port) {
     const url = `http://${addr}:${port}/api/bot/use/0/(/list/list/${listId})`
     const data = await sendURL(url, requestOptions);
+
     if (!((data).find(item => item.Id === listId))) {
         url_create = `http://${addr}:${port}/api/bot/use/0/(/list/create/${listId}/${listId})`
         const data_create = await sendURL(url_create, requestOptions);
