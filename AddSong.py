@@ -18,6 +18,7 @@ def get_song_list(play_list_id):
 
     response = requests.get(url, headers)
     response.encoding = response.apparent_encoding
+    print(response.text)
 
     soup = BeautifulSoup(response.text, 'lxml')
 
@@ -31,14 +32,14 @@ def get_song_list(play_list_id):
         id_match = re.search(r'<a\s.*?href="/song\?id=(\d+)".*?', str(a))
         data[id_match.group(1)] = name_match.group(1)
 
-    data = json.dumps(data, indent = 2)
-    with open('song.json', 'w', encoding = 'utf-8') as file_json:
-        file_json.write(data)
-
     if platform.system() == "Linux":
         os.remove('song.json')
     elif platform.system() == "Windows":
         os.unlink('song.json')
+
+    data = json.dumps(data, indent = 2)
+    with open('song.json', 'w', encoding = 'utf-8') as file_json:
+        file_json.write(data)
 
 def create_list(addr, port, list_id, token):
     url = "http://" + addr + ":" + "/api/bot/use/0/(/list/create/id/id)"
@@ -53,6 +54,8 @@ def create_list(addr, port, list_id, token):
     print(response.text)
 
 def main():
+    print("Script start...\n")
+
     if len(sys.argv) == 6:
         play_list_id = sys.argv[1]
         addr = sys.argv[2]
@@ -62,6 +65,7 @@ def main():
     else:
         print("Please enter the right arguments.")
         exit()
+
 
     get_song_list(play_list_id)
     create_list(addr, port, list_id, token)
