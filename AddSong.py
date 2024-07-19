@@ -1,49 +1,44 @@
 import requests
-from bs4 import BeautifulSoup
 import re
 import json
-import subprocess
 import os
 import sys
-import time
 import platform
 
 def get_song_list(play_list_id):
-    url = "https://music.163.com/playlist?id=" + play_list_id
+    url = "http://121.37.225.70:4000/playlist/track/all?id=" + play_list_id
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
-        'Cookie': 'os=pc'
     }
 
     response = requests.get(url, headers)
     response.encoding = response.apparent_encoding
-    print(response.text)
 
-    soup = BeautifulSoup(response.text, 'lxml')
+    data = json.loads(response.text)
+    songs_add = []
+    list_length = len(data['songs'])
 
-    ul = soup.find('ul', class_ = 'f-hide')
-    a_list = ul.find_all('a')
+    for i in range(list_length):
+        songs_add.append([0, 0])
+        song_name = data['songs'][i]['name']
+        song_id = data['songs'][i]['id']
+        songs_add[i][0] = song_name
+        songs_add[i][1] = song_id
 
-    data = {}
+    return songs_add, list_length
+    # if platform.system() == "Linux":
+    #     os.remove('song.json')
+    # elif platform.system() == "Windows":
+    #     os.unlink('song.json')
 
-    for a in a_list:
-        name_match = re.search(r'<a\s.*?>(.*?)<\/a>', str(a))
-        id_match = re.search(r'<a\s.*?href="/song\?id=(\d+)".*?', str(a))
-        data[id_match.group(1)] = name_match.group(1)
+    # with open('song.json', 'w', encoding = 'utf-8') as file_json:
+    #     file_json.write(songs_add)
 
-    if platform.system() == "Linux":
-        os.remove('song.json')
-    elif platform.system() == "Windows":
-        os.unlink('song.json')
-
-    data = json.dumps(data, indent = 2)
-    with open('song.json', 'w', encoding = 'utf-8') as file_json:
-        file_json.write(data)
 
 def create_list(addr, port, list_id, token):
-    url = "http://" + addr + ":" + "/api/bot/use/0/(/list/create/id/id)"
-    surl = "http://" + addr + ":" + "/api/bot/use/0/(/list/list/id)"
+    url = "http://" + addr + ":" + port + "/api/bot/use/0/list/create/id/id"
+    surl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/list/" + list_id + ")"
 
     headers = {
         'Authorization': 'Basic ' + token,
@@ -52,6 +47,15 @@ def create_list(addr, port, list_id, token):
 
     response = requests.get(surl, headers)
     print(response.text)
+
+
+def add_song(addr, port, songs_json, song_list_len, listId):
+    for i in range(song_list_len):
+        songName = songs_json[i][0]
+        songId = songs_json[i][1]
+        addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/listId/http%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D" + songId + "}.mp3"
+        nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + listId + "/" + songBeginNumber + "/" + songName
+
 
 def main():
     print("Script start...\n")
@@ -67,7 +71,7 @@ def main():
         exit()
 
 
-    get_song_list(play_list_id)
+    # get_song_list(play_list_id)
     create_list(addr, port, list_id, token)
 
 main()
