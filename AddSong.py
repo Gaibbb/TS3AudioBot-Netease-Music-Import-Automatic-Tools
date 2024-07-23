@@ -5,14 +5,42 @@ import os
 import sys
 import platform
 
+def get_song_list_kg(play_list_id, headers):
+    url = "http://121.37.225.70:4001/playlist/track/all?id=" + play_list_id
+
+    response = requests.get(url, headers=headers)
+    data = json.loads(response.text)
+    data = data['data']['info']
+    song_list_len_src = len(data)
+    song_list_name = []
+    song_list_hash = []
+    for i in range(song_list_len_src):
+        song_name = data[i]['name']
+        song_hash = data[i]['hash']
+        song_list_name.append(song_name)
+        song_list_hash.append(song_hash)
+    return song_list_name, song_list_hash, song_list_len_src
+
+def get_song_url_kg(song_list_name, song_list_hash, song_list_len):
+    url_list = []
+    for i in range(song_list_len):
+        hash = song_list_hash[i]
+        url = "http://121.37.225.70:4001/song/url?hash=" + hash
+        response = requests.get(url)
+        data = json.loads(response.text)
+        
+        if "url" in data:
+            url_list.append([[song_list_name[i]], data['url'][0]])
+        else:
+            print(f"Not import success: {song_list_name[i]}")
+
+    return url_list
+
+
 def get_song_list(play_list_id):
     url = "http://121.37.225.70:4000/playlist/track/all?id=" + play_list_id
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
-    }
-
-    response = requests.get(url, headers)
+    response = requests.get(url)
     response.encoding = response.apparent_encoding
 
     data = json.loads(response.text)
@@ -27,40 +55,65 @@ def get_song_list(play_list_id):
         songs_add[i][1] = song_id
 
     return songs_add, list_length
-    # if platform.system() == "Linux":
-    #     os.remove('song.json')
-    # elif platform.system() == "Windows":
-    #     os.unlink('song.json')
 
-    # with open('song.json', 'w', encoding = 'utf-8') as file_json:
-    #     file_json.write(songs_add)
+def list_search(addr, port, list_id, headers):
+    url = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/create/" + list_id + "/" + list_id 
+    surl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/list"
+
+    response = requests.get(surl, headers=headers)
+    data = json.loads(response.text)
+
+    for i in range(len(data)):
+        if data[i]['Title'] == list_id:
+            print("List existed")
+            return data[i]['SongCount']
+        elif i == (len(data) - 1) and data[i]['Title'] != list_id:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 204:
+                print("list", list_id, "created successfully.")
+                return 0
+            else:
+                print(response.status_code)
+
+def add_song_kg(addr, port, song_list, song_list_len, listId, song_begin_number, headers):
+    print("Ready to add", song_list_len, "songs to list", listId)
+
+    for i in range(song_list_len):
+        song_name = song_list[i][0]
+        song_url = song_list[i][1]
+        addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/" + listId + "/\"" + song_url + "\""
+        nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + str(listId) + "/" + str(song_begin_number) + "/" + str(song_name)
+
+        print(addurl)
+        response = requests.get(addurl, headers=headers)
+        response1 = requests.get(nameurl, headers=headers)
+
+        print(response, response1)
 
 
-def create_list(addr, port, list_id, token):
-    url = "http://" + addr + ":" + port + "/api/bot/use/0/list/create/id/id"
-    surl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/list/" # + list_id + ")"
+def add_song(addr, port, songs_json, song_list_len, listId, song_begin_number, token):
+    print("Ready to add", song_list_len, "songs to list", listId)
 
     headers = {
         'Authorization': 'Basic ' + token,
-        'Content-Type': 'application/json'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0'
     }
 
-    response = requests.get(surl, headers)
-    print(response.text)
+    headers1 = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/35.0.1916.138 Safari/537.36'}
 
-
-def add_song(addr, port, songs_json, song_list_len, listId):
     for i in range(song_list_len):
         songName = songs_json[i][0]
         songId = songs_json[i][1]
-        addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/listId/http%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D" + songId + "}.mp3"
-        nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + listId + "/" + songBeginNumber + "/" + songName
+        addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/listId/https%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D" + str(songId) + ".mp3"
+        nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + str(listId) + "/" + str(song_begin_number) + "/" + songName
+        print(songId)
+        # url = "http://121.37.225.70:4000/song/url?id=" + str(songId)
+        url = "http://music.163.com/song/media/outer/urlid=" + str(songId) + ".mp3"
+        response = requests.get(url, headers=headers1)
+        print(response.text)
 
-def getListSongNumber(listId, addr, port, token):
-    headers = {
-        'Authorization': 'Basic ' + token,
-        'Content-Type': 'application/json'
-    }
+        # response = requests.get(addurl, headers=headers)
+        # response = requests.get(nameurl, headers=headers)
 
 
 def main():
@@ -76,8 +129,19 @@ def main():
         print("Please enter the right arguments.")
         exit()
 
-    print(token)
-    # get_song_list(play_list_id)
-    create_list(addr, port, list_id, token)
+    headers_auth = {
+        'Authorization': 'Basic ' + token,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0'
+    }
+
+    song_number = list_search(addr, port, list_id, headers_auth)
+    song_list_name, song_list_hash, song_list_len = get_song_list_kg(play_list_id, headers_auth)
+    url_list = get_song_url_kg(song_list_name, song_list_hash, song_list_len)
+    list_len = len(url_list)
+    add_song_kg(addr, port, url_list, list_len, list_id, song_number, headers_auth)
+
+    # song_list, song_number = get_song_list(play_list_id)
+    # song_begin_number = list_search(addr, port, list_id, token)
+    # add_song(addr, port, song_list, song_number, list_id, song_begin_number, token)
 
 main()
