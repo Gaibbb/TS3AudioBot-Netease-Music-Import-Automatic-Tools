@@ -63,10 +63,10 @@ def add_song_kg(addr, port, song_list, song_list_len, listId, song_begin_number,
         song_url = song_list[i][1]
         songurl_trans = urllib.parse.quote(song_url, safe='')
         addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/" + listId + "/" + songurl_trans + ")"
-        # nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + str(listId) + "/" + str(song_begin_number) + "/" + str(song_name)
+        nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + str(listId) + "/" + str(song_begin_number) + "/" + str(song_name)
 
         response = requests.get(addurl, headers=headers)
-        # response1 = requests.get(nameurl, headers=headers)
+        response1 = requests.get(nameurl, headers=headers)
 
         print(f"Add song {song_name} to the list")
 
