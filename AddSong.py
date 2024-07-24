@@ -59,12 +59,10 @@ def add_song_kg(addr, port, song_list, song_list_len, listId, song_begin_number,
     for i in range(song_list_len):
         song_name = song_list[i][0]
         song_url = song_list[i][1]
-        print(song_url)
         songurl_trans = urllib.parse.quote(song_url, safe='')
         addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/" + listId + "/" + songurl_trans + ")"
         # nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + str(listId) + "/" + str(song_begin_number) + "/" + str(song_name)
 
-        print(addurl)
         response = requests.get(addurl, headers=headers)
         # response1 = requests.get(nameurl, headers=headers)
 
