@@ -1,9 +1,7 @@
 import requests
-import re
 import json
-import os
 import sys
-import platform
+import urllib.parse
 
 def get_song_list_kg(play_list_id, headers):
     url = "http://121.37.225.70:4001/playlist/track/all?id=" + play_list_id
@@ -36,26 +34,6 @@ def get_song_url_kg(song_list_name, song_list_hash, song_list_len):
 
     return url_list
 
-
-def get_song_list(play_list_id):
-    url = "http://121.37.225.70:4000/playlist/track/all?id=" + play_list_id
-
-    response = requests.get(url)
-    response.encoding = response.apparent_encoding
-
-    data = json.loads(response.text)
-    songs_add = []
-    list_length = len(data['songs'])
-
-    for i in range(list_length):
-        songs_add.append([0, 0])
-        song_name = data['songs'][i]['name']
-        song_id = data['songs'][i]['id']
-        songs_add[i][0] = song_name
-        songs_add[i][1] = song_id
-
-    return songs_add, list_length
-
 def list_search(addr, port, list_id, headers):
     url = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/create/" + list_id + "/" + list_id 
     surl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/list"
@@ -81,39 +59,16 @@ def add_song_kg(addr, port, song_list, song_list_len, listId, song_begin_number,
     for i in range(song_list_len):
         song_name = song_list[i][0]
         song_url = song_list[i][1]
-        addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/" + listId + "/\"" + song_url + "\""
-        nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + str(listId) + "/" + str(song_begin_number) + "/" + str(song_name)
+        print(song_url)
+        songurl_trans = urllib.parse.quote(song_url, safe='')
+        addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/" + listId + "/" + songurl_trans + ")"
+        # nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + str(listId) + "/" + str(song_begin_number) + "/" + str(song_name)
 
         print(addurl)
         response = requests.get(addurl, headers=headers)
-        response1 = requests.get(nameurl, headers=headers)
+        # response1 = requests.get(nameurl, headers=headers)
 
-        print(response, response1)
-
-
-def add_song(addr, port, songs_json, song_list_len, listId, song_begin_number, token):
-    print("Ready to add", song_list_len, "songs to list", listId)
-
-    headers = {
-        'Authorization': 'Basic ' + token,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0'
-    }
-
-    headers1 = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/35.0.1916.138 Safari/537.36'}
-
-    for i in range(song_list_len):
-        songName = songs_json[i][0]
-        songId = songs_json[i][1]
-        addurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/add/listId/https%3A%2F%2Fmusic.163.com%2Fsong%2Fmedia%2Fouter%2Furl%3Fid%3D" + str(songId) + ".mp3"
-        nameurl = "http://" + addr + ":" + port + "/api/bot/use/0/(/list/item/name/" + str(listId) + "/" + str(song_begin_number) + "/" + songName
-        print(songId)
-        # url = "http://121.37.225.70:4000/song/url?id=" + str(songId)
-        url = "http://music.163.com/song/media/outer/urlid=" + str(songId) + ".mp3"
-        response = requests.get(url, headers=headers1)
-        print(response.text)
-
-        # response = requests.get(addurl, headers=headers)
-        # response = requests.get(nameurl, headers=headers)
+        print(response)
 
 
 def main():
@@ -139,9 +94,5 @@ def main():
     url_list = get_song_url_kg(song_list_name, song_list_hash, song_list_len)
     list_len = len(url_list)
     add_song_kg(addr, port, url_list, list_len, list_id, song_number, headers_auth)
-
-    # song_list, song_number = get_song_list(play_list_id)
-    # song_begin_number = list_search(addr, port, list_id, token)
-    # add_song(addr, port, song_list, song_number, list_id, song_begin_number, token)
 
 main()
