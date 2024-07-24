@@ -17,6 +17,8 @@ def get_song_list_kg(play_list_id, headers):
         song_hash = data[i]['hash']
         song_list_name.append(song_name)
         song_list_hash.append(song_hash)
+
+    print(song_list_name)
     return song_list_name, song_list_hash, song_list_len_src
 
 def get_song_url_kg(song_list_name, song_list_hash, song_list_len):
@@ -66,7 +68,7 @@ def add_song_kg(addr, port, song_list, song_list_len, listId, song_begin_number,
         response = requests.get(addurl, headers=headers)
         # response1 = requests.get(nameurl, headers=headers)
 
-        print(response)
+        print(f"Add song {song_name} to the list")
 
 
 def main():
