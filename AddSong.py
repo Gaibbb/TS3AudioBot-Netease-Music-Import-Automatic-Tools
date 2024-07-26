@@ -24,7 +24,7 @@ def get_song_list_kg(play_list_id, headers):
         print(f"song list len = {song_list_len_src}")
         for i in range(song_list_len_src):
             song_name = data[i]['name']
-            song_hash = data[i]['hash']
+            song_hash = data[i]['trans_param']['ogg_320_hash']
             song_list_name.append(song_name)
             song_list_hash.append(song_hash)
 
@@ -33,11 +33,11 @@ def get_song_list_kg(play_list_id, headers):
 def get_song_url_kg(song_list_name, song_list_hash, song_list_len):
     url_list = []
     for i in range(song_list_len):
-        print(f"This is the {i} song")
         hash = song_list_hash[i]
         url = "http://121.37.225.70:4001/song/url?hash=" + hash
         response = requests.get(url)
         data = json.loads(response.text)
+        print(data)
         
         if "url" in data:
             url_list.append([[song_list_name[i]], data['url'][0]])
@@ -108,6 +108,6 @@ def main():
     song_list_name, song_list_hash, song_list_len = get_song_list_kg(play_list_id, headers_auth)
     url_list = get_song_url_kg(song_list_name, song_list_hash, song_list_len)
     list_len = len(url_list)
-    add_song_kg(addr, port, url_list, list_len, list_id, song_number, headers_auth)
+    # add_song_kg(addr, port, url_list, list_len, list_id, song_number, headers_auth)
 
 main()
